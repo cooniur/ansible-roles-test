@@ -1,0 +1,33 @@
+VAGRANTFILE_API_VERSION = "2"
+
+vm_hostname = "appserver"
+vm_memory = 2048
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |c|
+	c.vm.define vm_hostname do |m|
+		m.vm.box = "chef/centos-6.5"
+		m.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box"
+		m.vm.hostname = vm_hostname
+
+		m.vm.network(:private_network, {:ip=>"10.0.34.11"})
+
+		m.vm.network(:forwarded_port, {:guest=>8080, :host=>9080})
+		m.vm.network(:forwarded_port, {:guest=>9797, :host=>9997})
+		m.vm.network(:forwarded_port, {:guest=>9798, :host=>9998})
+
+		m.vm.synced_folder ".", "/vagrant", disabled: false
+
+		m.vm.provider :virtualbox do |virtualbox|
+			virtualbox.customize ["modifyvm", :id, "--memory", vm_memory]
+			virtualbox.customize ["modifyvm", :id, "--name", vm_hostname]
+		end # m.vm.provider
+
+		m.vm.provision :ansible do |ansible|
+			ansible.playbook = "./vagrant-site.yml"
+			ansible.inventory_path = "./vagrant-hosts"
+			ansible.sudo = true
+			ansible.verbose = "v"
+			ansible.extra_vars = { ansible_ssh_user: 'vagrant' }
+		end
+	end
+end

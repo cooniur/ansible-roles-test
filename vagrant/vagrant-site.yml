@@ -1,0 +1,11 @@
+---
+# Ansible playbook for Vagrant provisioning
+# file: vagrant-site.yml
+
+- hosts: all
+  roles:
+  - { role: packages, packages_list: [ "epel-release" ] }
+  - { role: python-packages, python_packages_list: [ "boto" ] }
+  - { role: java, jdk_vendor: "oracle", jdk_version_major: "8", jdk_version_update: "20", jdk_version_build: "26" }
+  - { role: groovy, groovy_version_major: "2", groovy_version_minor: "3", groovy_version_patch: "6"  }
+  - { role: tomcat, tomcat_version_major: "8", tomcat_version_minor: "0", tomcat_version_micro: "12" }
